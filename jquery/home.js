@@ -16,6 +16,69 @@ function showPosition(position) {
 
 }
 
+
+function calculateDistance(lat1, lon1, lat2, lon2, unit) {
+      var radlat1 = Math.PI * lat1/180;
+      var radlat2 = Math.PI * lat2/180;
+      var radlon1 = Math.PI * lon1/180;
+      var radlon2 = Math.PI * lon2/180;
+      var theta = lon1-lon2;
+      var radtheta = Math.PI * theta/180;
+      var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
+      dist = Math.acos(dist);
+      dist = dist * 180/Math.PI;
+      dist = dist * 60 * 1.1515;
+      if (unit=="K") { dist = dist * 1.609344; }
+      if (unit=="N") { dist = dist * 0.8684; }
+      return dist;
+  }
+
+
+var markerPositions = [
+      // filipino
+      {lat: 10.312044, lng: 123.918810},
+      {lat: 10.326320, lng: 123.880830},
+      {lat: 10.310690, lng: 123.881790},
+      {lat: 10.311780, lng: 123.916410},
+     
+     // japanesse
+       {lat: 10.297020, lng: 123.883050},
+       {lat: 10.309938, lng: 123.919534},
+
+       // korean
+      {lat: 10.289610, lng: 123.867610},
+      {lat: 10.343889, lng: 123.911421},  
+      {lat: 10.321577, lng: 123.904081},
+
+
+      // chinesse
+      {lat: 10.281350, lng: 123.976580},
+      {lat: 10.291020, lng: 123.866820},
+      {lat: 10.282591, lng: 123.881018},
+
+      //pizza
+      {lat: 10.3415839, lng: 123.9173618},
+      {lat: 10.358810, lng: 123.920270},
+      
+      //coffee
+      {lat: 10.358810, lng: 123.920270},
+      {lat: 10.343678, lng: 123.911597},
+      {lat: 10.357420, lng: 123.911330}
+ 
+];
+
+
+function setContents(countRestaurant){
+
+ var contents = '<div id="content">'+    
+  '<div id="siteNotice">'+    
+  '</div>'+    
+  '<span style="font-size:medium; color: black; font-weight:bold;">Total Restaurant: '+countRestaurant+'</span>'+    
+  '</div>';   
+
+return contents;
+}
+
 $(window).load(function (){
 
 
@@ -27,7 +90,6 @@ getLocation();
       label:'filipino',
       // we will use GeoJson data for importing locations. 
       //reference: https://developers.google.com/maps/documentation/javascript/importing_data?authuser=1#data
-
 
       //the category may be default-checked when you want to
       //uncomment the next line
@@ -48,8 +110,8 @@ getLocation();
       icon: 'http://maps.gstatic.com/mapfiles/markers2/boost-marker-mapview.png',
       items: [
               ['Cafe Marco', 10.297020, 123.883050, 201],
-            ['Feria', 10.311780, 123.916412, 200],
-             ]
+              ['Feria', 10.309938, 123.919534, 200],
+             ]   
     } ,
 
     korean:{
@@ -60,9 +122,9 @@ getLocation();
       icon: 'http://maps.gstatic.com/mapfiles/markers2/icon_green.png',
       items: [
               ['KAYA Korean BBQ', 10.289610, 123.867610, 220],
-              ['Ma Roo Korean Restaurant', 10.311780, 123.916410, 223],
+              ['Ma Roo Korean Restaurant', 10.343889, 123.911421, 223],
               ['Han Guk Kwan Korean Restaurant', 10.321577, 123.904081,113]
-             ]
+             ]    
     }  ,
      chinese:{
       label:'chinese',
@@ -73,7 +135,7 @@ getLocation();
       items: [
               ['Tsay Cheng Chinese Restaurant', 10.281350, 123.976580, 112],
               ['Ding Qua Qua Cebu City', 10.291020, 123.866820,115],
-              ['Tim Ho Wan', 10.311780, 123.916410, 120]
+              ['Tim Ho Wan', 10.282591, 123.881018, 120]
              ]
     },
      pizza:{
@@ -84,8 +146,8 @@ getLocation();
       icon: 'http://maps.gstatic.com/mapfiles/markers2/icon_green.png',
       items: [
               ['La Nostra Pizzeria Napoletana', 10.340830, 123.910580, 100],
-              ['Tavolata', 10.311780, 123.916410, 120]
-             ]
+              ['Tavolata', 10.3415839, 123.9173618, 120]
+             ] 
     }  ,
     cafe:{
       label:'cafe',
@@ -94,10 +156,10 @@ getLocation();
       //checked:true,
       icon: 'http://maps.gstatic.com/mapfiles/markers2/boost-marker-mapview.png',
       items: [
-              ['Yolk Coffee And Breakfast', 10.358810, 123.920270, 130],
-              ['Bloom Cakes & Coffee', 10.281350, 123.976580, 50],
+              ['Yolk Coffee And Breakfast', 10.330026, 123.905555, 130],
+              ['Bloom Cakes & Coffee', 10.343678, 123.911597, 50],
               ['Soho Park', 10.357420, 123.911330, 40]
-             ]
+             ]    
     }              
   },
   map = new google.maps.Map(
@@ -122,24 +184,75 @@ getLocation();
                         textAlign:'center'
                        });
  
+
+  
+
    var drawingManager = new google.maps.drawing.DrawingManager({
-          // drawingMode: google.maps.drawing.OverlayType.MARKER,
-          // drawingControl: true,
           drawingControlOptions: {
             position: google.maps.ControlPosition.TOP_CENTER,
             drawingModes: ['circle', 'rectangle']
           },
-          // markerOptions: {icon: 'https://developers.google.com/maps/documentation/javascript/examples/full/images/beachflag.png'},
           circleOptions: {
             fillColor: '#0c5460',
-            fillOpacity: 1,
-            strokeWeight: 1,
+            fillOpacity: 0.35,
+            strokeWeight: 0,
             clickable: true,
             editable: true,
             zIndex: 1
           }
         });
         drawingManager.setMap(map);
+
+
+var countRestaurant = 0; // total counts of restaurant after drawing
+ google.maps.event.addListener(drawingManager, 'circlecomplete', function(circle) {
+          var radius = circle.getRadius();
+          console.log("circle radius: "+radius);
+          
+            var count = 0;
+            for (var i=0; i<markerPositions.length; i++) {
+                var distance = calculateDistance(
+                        markerPositions[i].lat,
+                        markerPositions[i].lng,
+                        circle.getCenter().lat(),
+                        circle.getCenter().lng(),
+                        "K");
+
+                var radConvertToKM = radius;
+                console.log("distance:"+distance+"| distance x 1000: "+distance*100+" | radius: "+ radConvertToKM);
+                if (distance * 1000 < radConvertToKM) {  // radius is in meter; distance in km
+                    console.log("Have 1 record of Restaurant");
+                    count++;
+                }
+                else {
+                    console.log("No Record of Restaurant");
+                }
+
+            }// end of for loop
+
+            console.log("Total Restaurant: "+count);
+            var contents = setContents(count);
+
+            var infowindow = new google.maps.InfoWindow({    
+              content: contents    
+            });
+
+          infowindow.setPosition(circle.getCenter());
+          infowindow.open(map);
+
+        });
+ 
+
+
+google.maps.event.addListener(drawingManager, 'rectanglecomplete', function(rectangle) {
+   var ne = rectangle.getBounds().getNorthEast();
+   var sw = rectangle.getBounds().getSouthWest();
+  console.log("NE: "+ne+" | SW: "+sw);
+  infowindow.setPosition(rectangle.getBounds().getNorthEast());
+  infowindow.open(map);
+});
+
+
 
   //show all-button
   ctrl.append($('<input>',{type:'button',value:'show all',class:'btn btn-primary'})
@@ -196,6 +309,13 @@ getLocation();
             console.log("Current Location (Longitude): " + current_location_longitude);
             googleMapService.getGeolocationData(current_location_latitude,current_location_longitude, item[1], item[2]);
          });
+
+
+
+
+
+
+
       });
         
   });
