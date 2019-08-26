@@ -1,0 +1,275 @@
+<!-- CEBU Restaurants
+
+https://www.tripadvisor.com.ph/Restaurants-g298460-Cebu_City_Cebu_Island_Visayas.html
+https://developers.google.com/maps/documentation/javascript/examples/event-closure
+
+ 1. Plot restaurants across Cebu. 
+ 2. Each restaurant will have at least 1 food specialty.
+ 3. A layer panel can filter the restaurant type to show. 
+ 4. Each restaurant can keep track of the number of customers that visited. 
+ 5. Customers can get direction to the restaurant from current location. 
+ 6. Draw a circle or rectangle on the map and and show the number of restaurants within the circle or rectangle. 
+ 7. Add any value adding feature like analytics to show relationships between patrons, restaurant  and revenue. 
+
+ -->
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+ <meta charset="utf-8">
+
+  <title>Navagis Web Development Assessment</title>
+  <meta name="description" content="Navagis Web Development Assessment">
+  <meta name="author" content="Andrei Centeno">
+
+<script src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<!-- <script src="https://code.highcharts.com/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/modules/export-data.js"></script> -->
+
+
+ <link href="bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<style>
+		html,body,#map{
+			    margin:0;
+			    padding:0;
+			    height:100%;
+			    
+			}
+    
+    /*High Charts for Analytics*/
+
+
+#table-sparkline {
+    margin: 0 auto;
+    border-collapse: collapse;
+}
+th {
+    font-weight: bold;
+    text-align: left;
+}
+td, th {
+    padding: 5px;
+    border-bottom: 1px solid silver;
+    height: 20px;
+}
+
+thead th {
+    border-top: 2px solid gray;
+    border-bottom: 2px solid gray;
+}
+.highcharts-tooltip>span {
+    background: white;
+    border: 1px solid silver;
+    border-radius: 3px;
+    box-shadow: 1px 1px 2px #888;
+    padding: 8px;
+}
+
+
+	</style>
+
+
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top" style="background-color: rgba(19,58,78,.9) !important;">
+    <div class="container">
+      <a class="navbar-brand" href="#">
+        <img src="images/navagis-logo-white.png" width="200" alt="Navagis">
+      &nbsp;&nbsp;  <span stlye="font-size:medium;"> Navagis Web Development Assessment  </span> </a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="index.html">Home
+              <span class="sr-only">(current)</span>
+            </a>
+          </li>
+         <li class="nav-item active">
+              <a class="nav-link" href="analytics.html">Analytics
+               
+              </a>
+            </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+    <div class="container">
+    <div class="row">
+       <div class="col-lg-12"> 
+        <br/>
+          <h3>Restaurant Analytics</h3>
+<hr/>
+            <table id="table-sparkline">
+                <thead>
+                    <tr>
+                        <th>Restaurant</th>
+                        <th>Income</th>
+                        <th>Income per quarter</th>
+                        <th>Costs</th>
+                        <th>Costs per quarter</th>
+                        <th>Result</th>
+                        <th>Result per quarter</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody-sparkline">
+                    <tr>
+                        <th>Vikings SM City Cebu Restaurant</th>
+                        <td>254</td>
+                        <td data-sparkline="71, 78, 39, 66 "/>
+                        <td>296</td>
+                        <td data-sparkline="68, 52, 80, 96 "/>
+                        <td>-42</td>
+                        <td data-sparkline="3, 26, -41, -30 ; column"/>
+                    </tr>
+                    <tr>
+                        <th>Lantaw 2 Native Restaurant Cebu City</th>
+                        <td>246</td>
+                        <td data-sparkline="87, 44, 74, 41 "/>
+                        <td>181</td>
+                        <td data-sparkline="29, 54, 73, 25 "/>
+                        <td>65</td>
+                        <td data-sparkline="58, -10, 1, 16 ; column"/>
+                    </tr>
+                    <tr>
+                        <th>House Of Lechon Cebu City</th>
+                        <td>101</td>
+                        <td data-sparkline="56, 12, 8, 25 "/>
+                        <td>191</td>
+                        <td data-sparkline="69, 14, 53, 55 "/>
+                        <td>-90</td>
+                        <td data-sparkline="-13, -2, -45, -30 ; column"/>
+                    </tr>
+                    <tr>
+                        <th>Zubuchon Cebu City</th>
+                        <td>303</td>
+                        <td data-sparkline="81, 50, 78, 94 "/>
+                        <td>76</td>
+                        <td data-sparkline="36, 15, 14, 11 "/>
+                        <td>227</td>
+                        <td data-sparkline="45, 35, 64, 83 ; column"/>
+                    </tr>
+                    <tr>
+                        <th>KAYA Korean BBQ</th>
+                        <td>200</td>
+                        <td data-sparkline="61, 80, 10, 49 "/>
+                        <td>217</td>
+                        <td data-sparkline="100, 8, 52, 57 "/>
+                        <td>-17</td>
+                        <td data-sparkline="-39, 72, -42, -8 ; column"/>
+                    </tr>
+                    <tr>
+                        <th>Ma Roo Korean Restaurant</th>
+                        <td>118</td>
+                        <td data-sparkline="13, 48, 21, 36 "/>
+                        <td>273</td>
+                        <td data-sparkline="98, 86, 8, 81 "/>
+                        <td>-155</td>
+                        <td data-sparkline="-85, -38, 13, -45 ; column"/>
+                    </tr>
+
+                  
+                </tbody>
+            </table>
+
+       </div>
+       <div class="col-lg-12">
+        <br/>
+        <div id="customerBarChart" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+       </div>
+
+    </div>
+  </div>
+
+
+</body>
+
+</html>
+
+
+  <script type="text/javascript" src="jquery/analytics.js"></script>
+
+
+<script>
+
+Highcharts.chart('customerBarChart', {
+  chart: {
+    type: 'column'
+  },
+  title: {
+    text: 'Monthly Average Customer'
+  },
+  subtitle: {
+    text: 'Total Customers of each Restaurant in Cebu'
+  },
+  xAxis: {
+    categories: [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec'
+    ],
+    crosshair: true
+  },
+  yAxis: {
+    min: 0,
+    title: {
+      text: 'Customers (total)'
+    }
+  },
+  tooltip: {
+    headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+    pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+      '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+    footerFormat: '</table>',
+    shared: true,
+    useHTML: true
+  },
+  plotOptions: {
+    column: {
+      pointPadding: 0.2,
+      borderWidth: 0
+    }
+  },
+  series: [{
+    name: 'Vikings SM City Cebu Restaurant',
+    data: [49.9, 71.5, 106.4, 129.2, 144.0, 176.0, 135.6, 148.5, 216.4, 194.1, 95.6, 54.4]
+
+  }, {
+    name: 'House Of Lechon Cebu City',
+    data: [83.6, 78.8, 98.5, 93.4, 106.0, 84.5, 105.0, 104.3, 91.2, 83.5, 106.6, 92.3]
+
+  }, {
+    name: 'KAYA Korean BBQ',
+    data: [48.9, 38.8, 39.3, 41.4, 47.0, 48.3, 59.0, 59.6, 52.4, 65.2, 59.3, 51.2]
+
+  }, {
+    name: 'Zubuchon Cebu City',
+    data: [42.4, 33.2, 34.5, 39.7, 52.6, 75.5, 57.4, 60.4, 47.6, 39.1, 46.8, 51.1]
+
+  }]
+});
+
+
+
+
+
+
+  </script>
+
+
